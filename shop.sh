@@ -21,6 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#!/bin/bash
 
 array=(2 5 7 2 8 7)
 
@@ -149,20 +150,20 @@ function show_cart() {
 	echo ""
 	echo "Actions list"
 	echo "1 continue shopping "
-	echo "2 clean cart"
-	echo "3 check out "
-	echo "4 delete product from cart"
-	echo "5 see the cart"	
-	echo "6 exit"
+	# echo "2 clean cart"
+	echo "2 check out "
+	echo "3 delete product from cart"
+	# echo "5 see the cart"	
+	echo "4 exit"
 	read -p "Select action >> " action
 
 	case $action in 
 	1) select_product;;
-	2) clean_cart;;
-	3) check_out;;
-	4) delete_product_from_cart;;
-	5) show_cart;;
-	6) exit;;
+	# 2) clean_cart;;
+	2) check_out;;
+	3) delete_product_from_cart;;
+	# 5) show_cart;;
+	4) exit;;
 	esac
 
 }
@@ -179,7 +180,51 @@ function delete_product_from_cart() {
 	((counter++))
 	done
 	echo "-------------------------"
-	show_cart	
+	
+
+	echo ""
+	declare -A cart_map
+	echo "Cart content:"
+	while read -r line;
+	do	
+		if [ ${cart_map[$line,0]+abc} ]
+		then			
+			cardItem=${cart_map[$line,1]}
+			newCount=`expr $cardItem + 1`
+			cart_map[$line,1]=$newCount;
+		else	
+			cart_map[$line,0]=$line;
+			cart_map[$line,1]=1;
+		fi	
+	sequence=0
+	productString=''
+	done < cart
+
+	for i in "${!cart_map[@]}"
+	do		
+	  	if [[ $i == *,0 ]]
+		  then
+			productString="${toppings[${cart_map[$i]}]}"
+			productPrice="${prices[${cart_map[$i]}]}"
+		  else		
+			
+			productQuantity=${cart_map[$i]}					
+		fi
+
+		if [ $sequence -eq 0 ]
+		then
+			sequence=1
+		else
+			calcString="$productQuantity * $productPrice"
+			price=$(bc <<< $calcString)
+			productString="${productString}"" X${productQuantity} ""Price: $price"
+			echo -e "${CYAN}$productString${NC}"
+			sequence=0
+		fi
+	done
+
+
+
 	read -p "Enter product id >> " input	
 	echo $input
 	product_id=`expr $input - 1`	
@@ -197,6 +242,20 @@ function delete_product_from_cart() {
 
 	rm -rf cart
 	mv tmp_cart cart
+
+
+	echo 
+	echo -e "${GREEN}1: Delete an other item ${NC}"
+	echo -e "${GREEN}2: Continue shopping ${NC}"
+	echo -e "${GREEN}3: Exit ${NC}"
+	read -p "Select action >> " action
+
+	case $action in 
+	1) delete_product_from_cart;;
+	2) select_product;;
+	2) exit;;
+	esac
+
 }
 
 
@@ -234,29 +293,5 @@ function select_product() {
 while :
 do
 	select_product
-	# echo ""
-	# echo "Actions list"
-	# echo "1 add product to the cart"
-	# echo "2 clean cart"
-	# echo "3 check out "
-	# echo "4 delete product from cart"
-	# echo "5 see the cart"	
-	# echo "6 exit"
-	# read -p "Select action >> " action
-
-	# case $action in 
-	# 1) select_product;;
-	# 2) clean_cart;;
-	# 3) check_out;;
-	# 4) delete_product_from_cart;;
-	# 5) show_cart;;
-	# 6) exit;;
-	# esac
 	
 done
-
-case $selection in 
-1) echo "${toppings[0]} - \$${prices[0]}, great selection";;
-2) echo "${toppings[1]}, great selection";;
-3) echo "${toppings[2]}, great selection";;
-esac
