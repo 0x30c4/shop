@@ -1,2 +1,2 @@
-# shop
+# Shop
 Simple bash script for a shop
