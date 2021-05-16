@@ -1,2 +1,2 @@
 # Shop
-Simple bash script for a shop
+Simple shell script for a shop
